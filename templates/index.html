@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block title %}Add Workout{% endblock %}
+{% block content %}
+<h2>Add Workout</h2>
+<form id="workoutForm" action="/add_workout" method="post">
+    <label for="exercise">Exercise:</label>
+    <input type="text" id="exercise" name="exercise" required>
+    
+    <label for="sets">Sets:</label>
+    <input type="number" id="sets" name="sets" required>
+    
+    <label for="reps">Reps:</label>
+    <input type="number" id="reps" name="reps" required>
+    
+    <div id="weightsSection">
+        <label for="weight1">Weight for Set 1:</label>
+        <input type="number" id="weight1" name="weights" required>
+    </div>
+    
+    <input type="checkbox" id="sameWeight" name="sameWeight">
+    <label for="sameWeight">Use the same weight for all sets</label>
+    
+    <button type="submit">Add</button>
+</form>
+<br>
+
+<script>
+    document.getElementById('sets').addEventListener('input', function() {
+        var numSets = this.value;
+        var weightsSection = document.getElementById('weightsSection');
+        weightsSection.innerHTML = '';
+
+        for (var i = 1; i <= numSets; i++) {
+            var label = document.createElement('label');
+            label.htmlFor = 'weight' + i;
+            label.innerText = 'Weight for Set ' + i + ':';
+            weightsSection.appendChild(label);
+
+            var input = document.createElement('input');
+            input.type = 'number';
+            input.id = 'weight' + i;
+            input.name = 'weights';
+            input.required = true;
+            weightsSection.appendChild(input);
+        }
+    });
+
+    document.getElementById('sameWeight').addEventListener('change', function() {
+        var weightsInputs = document.querySelectorAll('[name="weights"]');
+        if (this.checked) {
+            var firstWeight = weightsInputs[0].value;
+            weightsInputs.forEach(function(input) {
+                input.value = firstWeight;
+                input.readOnly = true;
+            });
+        } else {
+            weightsInputs.forEach(function(input) {
+                input.readOnly = false;
+            });
+        }
+    });
+</script>
+{% endblock %}
