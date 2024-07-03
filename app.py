@@ -5,9 +5,10 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
+
 # Initialize SQLite database
 def init_db():
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('/home/TobyM7/gym_app/database.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS workouts
                  (id INTEGER PRIMARY KEY, exercise TEXT, sets INTEGER, reps INTEGER, weights TEXT, date TEXT)''')
@@ -37,7 +38,7 @@ def logout():
 @app.route('/dashboard')
 def dashboard():
     if 'loggedin' in session:
-        conn = sqlite3.connect('database.db')
+        conn = sqlite3.connect('/home/TobyM7/gym_app/database.db')
         c = conn.cursor()
         c.execute('SELECT * FROM workouts')
         workouts = c.fetchall()
@@ -68,7 +69,7 @@ def add_workout():
 @app.route('/history')
 def history():
     if 'loggedin' in session:
-        conn = sqlite3.connect('database.db')
+        conn = sqlite3.connect('/home/TobyM7/gym_app/database.db')
         c = conn.cursor()
         c.execute('SELECT * FROM workouts')
         workouts = c.fetchall()
@@ -80,7 +81,7 @@ def history():
 @app.route('/delete_workout/<int:workout_id>', methods=['POST'])
 def delete_workout(workout_id):
     if 'loggedin' in session:
-        conn = sqlite3.connect('database.db')
+        conn = sqlite3.connect('/home/TobyM7/gym_app/database.db')
         c = conn.cursor()
         c.execute('DELETE FROM workouts WHERE id = ?', (workout_id,))
         conn.commit()
