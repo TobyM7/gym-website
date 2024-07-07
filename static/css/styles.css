@@ -1,81 +1,148 @@
+/* Base Styles */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color: #0d0d24;
+    color: #e0e0e0;
     margin: 0;
     padding: 0;
 }
 
 .container {
-    width: 50%;
+    width: 90%;
+    max-width: 800px;
     margin: auto;
     overflow: hidden;
     padding: 20px;
-    background: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background: #1a1a3c;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     margin-top: 50px;
+    border-radius: 10px;
 }
 
+/* Navbar Styles */
 .navbar {
-    background: #333;
-    color: #fff;
+    background: #1a1a3c;
+    color: #e0e0e0;
     padding: 10px;
     text-align: right;
+    box-shadow: 0 4px 2px -2px #000;
 }
 
 .navbar a {
-    color: #fff;
+    color: #ffffff;
     text-decoration: none;
-    padding: 5px 10px;
+    padding: 10px 20px;
+    transition: color 0.3s ease;
 }
 
+.navbar a:hover {
+    color: #0288d1;
+}
+
+/* Heading Styles */
 h2 {
     text-align: center;
+    color: #ffffff;
 }
 
+/* Form Styles */
 form label {
     display: block;
     margin-top: 10px;
+    color: #ffffff;
 }
 
-form input {
-    width: 100%;
+form input,
+form select {
+    width: calc(100% - 20px);
     padding: 10px;
     margin: 10px 0;
     display: block;
-    border: 1px solid #ccc;
+    border: 1px solid #03a9f4;
+    background: #0d0d24;
+    color: #e0e0e0;
+    border-radius: 5px;
 }
 
+form select {
+    padding: 9px;
+}
+
+/* Button Styles */
 button {
     display: block;
-    width: 100%;
+    width:100%;
     padding: 10px;
-    background: #333;
+    margin: 10px 0;
+    background: #03a9f4;
     color: #fff;
     border: none;
     cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s ease;
 }
 
 button:hover {
-    background: #555;
+    background: #0288d1;
 }
 
+/* Search Box Styles */
 #search {
-    width: 100%;
+    width: calc(100% - 21.5px);
     padding: 10px;
     margin-bottom: 20px;
-    border: 1px solid #ccc;
+    border: 1px solid #03a9f4;
+    background: #0d0d24;
+    color: #e0e0e0;
 }
 
+/* Table Styles */
 table {
     width: 100%;
     border-collapse: collapse;
+    margin-bottom: 20px;
 }
 
 table, th, td {
-    border: 1px solid #ccc;
+    border: 1px solid #03a9f4;
 }
 
 th, td {
     padding: 10px;
     text-align: left;
+    color: #e0e0e0;
 }
+
+th {
+    background: #1a1a3c;
+}
+
+td {
+    background: #0d0d24;
+}
+
+@media screen and (max-width: 600px) {
+    .container {
+        width: 100%;
+        padding: 10px;
+    }
+
+    .navbar {
+        text-align: center;
+    }
+
+    .navbar a {
+        display: block;
+        padding: 10px;
+    }
+}
+#results li {
+            cursor: pointer;
+            padding: 5px;
+            transition: background-color 0.3s;
+        }
+
+        #results li:hover {
+            background-color: #0288d1;
+            color: white; /* Optional: change the text color when hovered */
+        }

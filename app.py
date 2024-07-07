@@ -1,14 +1,17 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import sqlite3
 from datetime import datetime
+from fuzzywuzzy import process
+import utils
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
+exercises = utils.load_exercises('exercises')
 
 # Initialize SQLite database
 def init_db():
-    conn = sqlite3.connect('/home/TobyM7/gym_app/database.db')
+    conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS workouts
                  (id INTEGER PRIMARY KEY, exercise TEXT, sets INTEGER, reps INTEGER, weights TEXT, date TEXT)''')
@@ -38,7 +41,7 @@ def logout():
 @app.route('/dashboard')
 def dashboard():
     if 'loggedin' in session:
-        conn = sqlite3.connect('/home/TobyM7/gym_app/database.db')
+        conn = sqlite3.connect('database.db')
         c = conn.cursor()
         c.execute('SELECT * FROM workouts')
         workouts = c.fetchall()
@@ -69,7 +72,7 @@ def add_workout():
 @app.route('/history')
 def history():
     if 'loggedin' in session:
-        conn = sqlite3.connect('/home/TobyM7/gym_app/database.db')
+        conn = sqlite3.connect('database.db')
         c = conn.cursor()
         c.execute('SELECT * FROM workouts')
         workouts = c.fetchall()
@@ -81,13 +84,24 @@ def history():
 @app.route('/delete_workout/<int:workout_id>', methods=['POST'])
 def delete_workout(workout_id):
     if 'loggedin' in session:
-        conn = sqlite3.connect('/home/TobyM7/gym_app/database.db')
+        conn = sqlite3.connect('database.db')
         c = conn.cursor()
         c.execute('DELETE FROM workouts WHERE id = ?', (workout_id,))
         conn.commit()
         conn.close()
         return redirect(url_for('history'))
     return redirect(url_for('login'))
+
+@app.route('/search', methods=['GET'])
+def search():
+    query = request.args.get('query', '')
+    if query:
+        results = process.extract(query, exercises, limit=10)
+        results = [result[0] for result in results]  # Extract the matched exercise names
+    else:
+        results = []
+    return jsonify(results)
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
