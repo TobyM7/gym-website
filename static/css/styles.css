@@ -142,7 +142,7 @@ td {
             transition: background-color 0.3s;
         }
 
-        #results li:hover {
+#results li:hover {
             background-color: #0288d1;
             color: white; /* Optional: change the text color when hovered */
-        }
+}

@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block title %}workout_templates{% endblock %}
+{% block content %}
+<body>
+ <h1>Create and Manage Workout Templates</h1>
+    <form method="POST">
+        <label for="name">Template Name:</label>
+        <input type="text" name="name" id="name" required><br>
+
+        <label for="exercises">Exercises (comma-separated):</label>
+        <input type="text" name="exercises" id="exercises" required><br>
+
+        <button type="submit">Create Template</button>
+    </form>
+    
+    <h2>Existing Templates</h2>
+    <ul>
+        {% for template in templates %}
+            <li>
+                <a href="{{ url_for('run_workout', template_id=template[0]) }}">{{ template[1] }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+    
+    <a href="{{ url_for('home') }}">Back to Home</a>
+{% endblock %}

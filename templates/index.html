@@ -17,13 +17,15 @@
         <label for="weight1">Weight for Set 1:</label>
         <input type="number" id="weight1" name="weights" required>
     </div>
-    <table>
-        <thead>
+    <table id="sameWeightTable">
         <tr>
-            <input type="checkbox" id="sameWeight" name="sameWeight">
+            <td>    
+        <input type="checkbox" id="sameWeight" name="sameWeight">
+                </td>
+            <td>
             <label for="sameWeight">Use the same weight for all sets</label>
-        </tr>
-            </thead>
+            </td>
+        <tr>    
     </table>
     <button type="submit">Add</button>
 </form>

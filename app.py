@@ -7,7 +7,7 @@ import utils
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
-exercises = utils.load_exercises('exercises')
+exercises_list = utils.load_exercises('exercises.txt')
 
 # Initialize SQLite database
 def init_db():
@@ -15,6 +15,8 @@ def init_db():
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS workouts
                  (id INTEGER PRIMARY KEY, exercise TEXT, sets INTEGER, reps INTEGER, weights TEXT, date TEXT)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS workout_templates
+                 (id INTEGER PRIMARY KEY, name TEXT, exercises TEXT)''')
     conn.commit()
     conn.close()
 
@@ -96,11 +98,62 @@ def delete_workout(workout_id):
 def search():
     query = request.args.get('query', '')
     if query:
-        results = process.extract(query, exercises, limit=10)
+        results = process.extract(query, exercises_list, limit=10)
         results = [result[0] for result in results]  # Extract the matched exercise names
     else:
         results = []
     return jsonify(results)
+
+@app.route('/workout_templates', methods=['GET', 'POST'])
+def workout_templates():
+    if 'loggedin' in session:
+        if request.method == 'POST':
+            name = request.form['name']
+            exercises = ','.join(request.form.getlist('exercises'))
+
+            conn = sqlite3.connect('database.db')
+            c = conn.cursor()
+            c.execute("INSERT INTO workout_templates (name, exercises) VALUES (?, ?)", (name, exercises))
+            conn.commit()
+            conn.close()
+
+            return redirect(url_for('workout_templates'))
+
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute('SELECT * FROM workout_templates')
+        templates = c.fetchall()
+        conn.close()
+
+        return render_template('workout_templates.html', templates=templates, exercises=exercises)
+    return redirect(url_for('login'))
+
+@app.route('/run_workout/<int:template_id>', methods=['GET', 'POST'])
+def run_workout(template_id):
+    if 'loggedin' in session:
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute('SELECT * FROM workout_templates WHERE id = ?', (template_id,))
+        template = c.fetchone()
+        conn.close()
+
+        if request.method == 'POST':
+            for exercise in request.form.getlist('exercises'):
+                exercise_name, sets, reps, weights = exercise.split(';')
+                date = datetime.now().strftime('%Y-%m-%d')
+
+                conn = sqlite3.connect('database.db')
+                c = conn.cursor()
+                c.execute("INSERT INTO workouts (exercise, sets, reps, weights, date) VALUES (?, ?, ?, ?, ?)",
+                          (exercise_name, sets, reps, weights, date))
+                conn.commit()
+                conn.close()
+
+            return redirect(url_for('dashboard'))
+
+        exercises = template[2].split(',')
+        return render_template('run_workout.html', template=template, exercises=exercises)
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     init_db()
