@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}workout_templates{% endblock %}
 {% block content %}
-<body>
  <h1>Create and Manage Workout Templates</h1>
     <form method="POST">
         <label for="name">Template Name:</label>
@@ -21,6 +20,5 @@
             </li>
         {% endfor %}
     </ul>
-    
-    <a href="{{ url_for('home') }}">Back to Home</a>
 {% endblock %}
+

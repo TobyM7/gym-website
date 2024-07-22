@@ -7,15 +7,15 @@
             <div>
                 <label>{{ exercise }}</label><br>
                 <label for="{{ exercise }}_sets">Sets:</label>
-                <input type="number" name="exercises" id="{{ exercise }}_sets" required><br>
+                <input type="number" name="sets_{{ loop.index }}" id="{{ exercise }}_sets" required><br>
                 <label for="{{ exercise }}_reps">Reps:</label>
-                <input type="number" name="exercises" id="{{ exercise }}_reps" required><br>
+                <input type="number" name="reps_{{ loop.index }}" id="{{ exercise }}_reps" required><br>
                 <label for="{{ exercise }}_weights">Weights (comma-separated):</label>
-                <input type="text" name="exercises" id="{{ exercise }}_weights" required><br>
-                <input type="hidden" name="exercises" value="{{ exercise }};{{ {{ exercise }}_sets.value }};{{ {{ exercise }}_reps.value }};{{ {{ exercise }}_weights.value }}">
+                <input type="text" name="weights_{{ loop.index }}" id="{{ exercise }}_weights" required><br>
+                <input type="hidden" name="exercises_{{ loop.index }}" value="{{ exercise }}">
             </div>
         {% endfor %}
         <button type="submit">Complete Workout</button>
     </form>
-    <a href="{{ url_for('home') }}">Back to Home</a>
 {% endblock %}
+
