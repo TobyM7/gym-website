@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %} Existing Templates{% endblock %}
+{% block content %}
+<h2>Existing Templates</h2>
+<ul>
+    {% for template in templates %}
+        <li>
+            <a href="{{ url_for('run_workout', template_id=template[0]) }}">{{ template[1] }}</a>
+            <form method="POST" action="{{ url_for('delete_template', template_id=template[0]) }}" style="display:inline;">
+                <button type="submit">Delete</button>
+            </form>
+            <form method="GET" action="{{ url_for('edit_template', template_id=template[0]) }}" style="display:inline;">
+                <button type="submit">Edit</button>
+            </form>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

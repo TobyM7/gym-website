@@ -83,6 +83,7 @@ def history():
         return render_template('history.html', workouts=workouts)
     return redirect(url_for('login'))
 
+
 @app.route('/delete_workout/<int:workout_id>', methods=['POST'])
 def delete_workout(workout_id):
     if 'loggedin' in session:
@@ -137,6 +138,19 @@ def workout_templates():
 
         return render_template('workout_templates.html', templates=templates)
     return redirect(url_for('login'))
+
+@app.route('/existing_templates',  methods=['GET', 'POST'])
+def existing_templates():
+    if 'loggedin' in session:
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute('SELECT * FROM workout_templates')
+        templates = c.fetchall()
+        conn.close()
+
+        return render_template('existing_templates.html', templates=templates)
+    return redirect(url_for('login'))
+
 @app.route('/create_template', methods=['POST'])
 def create_template():
     if 'loggedin' in session:
