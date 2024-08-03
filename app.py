@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 import sqlite3
 from datetime import datetime
 from fuzzywuzzy import process
@@ -48,6 +48,7 @@ def dashboard():
         c.execute('SELECT * FROM workouts')
         workouts = c.fetchall()
         conn.close()
+
         return render_template('dashboard.html', workouts=workouts)
     return redirect(url_for('login'))
 
@@ -66,6 +67,7 @@ def add_workout():
                   (exercise, sets, reps, weights, date))
         conn.commit()
         conn.close()
+
         return redirect(url_for('home'))
     return redirect(url_for('login'))
 
@@ -77,6 +79,7 @@ def history():
         c.execute('SELECT * FROM workouts')
         workouts = c.fetchall()
         conn.close()
+
         return render_template('history.html', workouts=workouts)
     return redirect(url_for('login'))
 
@@ -101,18 +104,29 @@ def search():
         results = []
     return jsonify(results)
 
+#Workouts from below here
+
+
 @app.route('/workout_templates', methods=['GET', 'POST'])
 def workout_templates():
     if 'loggedin' in session:
         if request.method == 'POST':
             name = request.form['name']
-            exercises = ','.join(request.form['exercises'].split(','))
+            exercises = []
+            i = 1
+            while f'exercise_name_{i}' in request.form:
+                exercise_name = request.form[f'exercise_name_{i}']
+                sets = request.form[f'sets_{i}']
+                reps = request.form[f'reps_{i}']
+                exercises.append({'name': exercise_name, 'sets': int(sets), 'reps': int(reps)})
+                i += 1
 
             conn = sqlite3.connect('database.db')
             c = conn.cursor()
-            c.execute("INSERT INTO workout_templates (name, exercises) VALUES (?, ?)", (name, exercises))
+            c.execute("INSERT INTO workout_templates (name, exercises) VALUES (?, ?)", (name, str(exercises)))
             conn.commit()
             conn.close()
+
             return redirect(url_for('workout_templates'))
 
         conn = sqlite3.connect('database.db')
@@ -120,7 +134,63 @@ def workout_templates():
         c.execute('SELECT * FROM workout_templates')
         templates = c.fetchall()
         conn.close()
+
         return render_template('workout_templates.html', templates=templates)
+    return redirect(url_for('login'))
+@app.route('/create_template', methods=['POST'])
+def create_template():
+    if 'loggedin' in session:
+        name = request.form['name']
+        exercises = ','.join(request.form.getlist('exercises'))
+
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO workout_templates (name, exercises) VALUES (?, ?)", (name, exercises))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('workout_templates'))
+    return redirect(url_for('login'))
+
+@app.route('/delete_template/<int:template_id>', methods=['POST'])
+def delete_template(template_id):
+    if 'loggedin' in session:
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute('DELETE FROM workout_templates WHERE id = ?', (template_id,))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('workout_templates'))
+    return redirect(url_for('login'))
+
+@app.route('/edit_template/<int:template_id>', methods=['GET', 'POST'])
+def edit_template(template_id):
+    if 'loggedin' in session:
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        
+        if request.method == 'POST':
+            name = request.form['name']
+            exercises = []
+            i = 1
+            while f'exercise_name_{i}' in request.form:
+                exercise_name = request.form[f'exercise_name_{i}']
+                sets = request.form[f'sets_{i}']
+                reps = request.form[f'reps_{i}']
+                exercises.append({'name': exercise_name, 'sets': int(sets), 'reps': int(reps)})
+                i += 1
+
+            c.execute("UPDATE workout_templates SET name = ?, exercises = ? WHERE id = ?", (name, str(exercises), template_id))
+            conn.commit()
+            conn.close()
+            return redirect(url_for('workout_templates'))
+        
+        c.execute('SELECT * FROM workout_templates WHERE id = ?', (template_id,))
+        template = c.fetchone()
+        conn.close()
+
+        exercises = eval(template[2])  # Convert string back to list of dictionaries
+        return render_template('edit_template.html', template=template, exercises=exercises)
     return redirect(url_for('login'))
 
 @app.route('/run_workout/<int:template_id>', methods=['GET', 'POST'])
@@ -133,12 +203,8 @@ def run_workout(template_id):
         conn.close()
 
         if request.method == 'POST':
-            num_exercises = len(template[2].split(','))
-            for i in range(1, num_exercises + 1):
-                exercise_name = request.form[f'exercises_{i}']
-                sets = int(request.form[f'sets_{i}'])
-                reps = int(request.form[f'reps_{i}'])
-                weights = request.form[f'weights_{i}']
+            for exercise in request.form.getlist('exercise_data'):
+                exercise_name, sets, reps, weights = exercise.split(';')
                 date = datetime.now().strftime('%Y-%m-%d')
 
                 conn = sqlite3.connect('database.db')
@@ -147,9 +213,10 @@ def run_workout(template_id):
                           (exercise_name, sets, reps, weights, date))
                 conn.commit()
                 conn.close()
-            return redirect(url_for('dashboard'))
 
-        exercises = template[2].split(',')
+            return redirect(url_for('history'))
+
+        exercises = eval(template[2])  # Convert string back to list of dictionaries
         return render_template('run_workout.html', template=template, exercises=exercises)
     return redirect(url_for('login'))
 

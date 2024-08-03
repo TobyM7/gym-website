@@ -1,21 +1,70 @@
 {% extends "layout.html" %}
-{% block title %}run_workout{% endblock %}
+{% block title %}Run Workout{% endblock %}
 {% block content %}
-    <h1>Run Workout: {{ template[1] }}</h1>
-    <form method="POST">
-        {% for exercise in exercises %}
-            <div>
-                <label>{{ exercise }}</label><br>
-                <label for="{{ exercise }}_sets">Sets:</label>
-                <input type="number" name="sets_{{ loop.index }}" id="{{ exercise }}_sets" required><br>
-                <label for="{{ exercise }}_reps">Reps:</label>
-                <input type="number" name="reps_{{ loop.index }}" id="{{ exercise }}_reps" required><br>
-                <label for="{{ exercise }}_weights">Weights (comma-separated):</label>
-                <input type="text" name="weights_{{ loop.index }}" id="{{ exercise }}_weights" required><br>
-                <input type="hidden" name="exercises_{{ loop.index }}" value="{{ exercise }}">
+<h1>Run Workout: {{ template[1] }}</h1>
+<form method="POST">
+    {% for exercise in exercises %}
+        <div>
+            <label>{{ exercise.name }}</label><br>
+            <p>Sets: {{ exercise.sets }}</p>
+            <p>Reps: {{ exercise.reps }}</p>
+            <div id="weightsSection_{{ exercise.name }}">
+                <label for="weight_{{ exercise.name }}_1">Weight for Set 1:</label>
+                <input type="number" name="weight_{{ exercise.name }}" id="weight_{{ exercise.name }}_1" required>
             </div>
-        {% endfor %}
-        <button type="submit">Complete Workout</button>
-    </form>
-{% endblock %}
+            <table id="sameWeightTable_{{ exercise.name }}">
+                <tr>
+                    <td>
+                        <input type="checkbox" id="sameWeight_{{ exercise.name }}" name="sameWeight_{{ exercise.name }}">
+                    </td>
+                    <td>
+                        <label for="sameWeight_{{ exercise.name }}">Use the same weight for all sets</label>
+                    </td>
+                </tr>
+            </table>
+            <input type="hidden" name="exercise_data" value="{{ exercise.name }};{{ exercise.sets }};{{ exercise.reps }};">
+        </div>
+        <hr>
+    {% endfor %}
+    <button type="submit">Complete Workout</button>
+</form>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const exercises = {{ exercises | tojson }};
+        exercises.forEach(exercise => {
+            const sets = exercise.sets;
+            const weightsSection = document.getElementById(`weightsSection_${exercise.name}`);
+            const sameWeightCheckbox = document.getElementById(`sameWeight_${exercise.name}`);
+            for (let i = 2; i <= sets; i++) {
+                const label = document.createElement('label');
+                label.htmlFor = `weight_${exercise.name}_${i}`;
+                label.innerText = `Weight for Set ${i}:`;
+                weightsSection.appendChild(label);
+
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.name = `weight_${exercise.name}`;
+                input.id = `weight_${exercise.name}_${i}`;
+                input.required = true;
+                weightsSection.appendChild(input);
+            }
+
+            sameWeightCheckbox.addEventListener('change', function() {
+                const weightsInputs = document.querySelectorAll(`[name="weight_${exercise.name}"]`);
+                if (this.checked) {
+                    const firstWeight = weightsInputs[0].value;
+                    weightsInputs.forEach(function(input) {
+                        input.value = firstWeight;
+                        input.readOnly = true;
+                    });
+                } else {
+                    weightsInputs.forEach(function(input) {
+                        input.readOnly = false;
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

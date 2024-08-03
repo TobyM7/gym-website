@@ -1,40 +1,27 @@
 {% extends "layout.html" %}
-{% block title %}Workout Templates{% endblock %}
+{% block title %}Edit Workout Template{% endblock %}
 {% block content %}
-<h1>Create and Manage Workout Templates</h1>
+<h1>Edit Workout Template: {{ template[1] }}</h1>
 <form method="POST">
     <label for="name">Template Name:</label>
-    <input type="text" name="name" id="name" required><br>
+    <input type="text" name="name" id="name" value="{{ template[1] }}" required><br>
 
     <div id="exercisesSection">
-        <div class="exerciseInput">
-            <label for="exercise_1">Exercise:</label>
-            <input type="text" name="exercise_name_1" required>
-            <label for="sets_1">Sets:</label>
-            <input type="number" name="sets_1" required>
-            <label for="reps_1">Reps:</label>
-            <input type="number" name="reps_1" required>
-        </div>
+        {% for exercise in exercises %}
+            <div class="exerciseInput">
+                <label for="exercise_{{ loop.index }}">Exercise:</label>
+                <input type="text" name="exercise_name_{{ loop.index }}" value="{{ exercise.name }}" required>
+                <label for="sets_{{ loop.index }}">Sets:</label>
+                <input type="number" name="sets_{{ loop.index }}" value="{{ exercise.sets }}" required>
+                <label for="reps_{{ loop.index }}">Reps:</label>
+                <input type="number" name="reps_{{ loop.index }}" value="{{ exercise.reps }}" required>
+            </div>
+        {% endfor %}
     </div>
 
     <button type="button" id="addExercise">Add Another Exercise</button><br>
-    <button type="submit">Create Template</button>
+    <button type="submit">Update Template</button>
 </form>
-
-<h2>Existing Templates</h2>
-<ul>
-    {% for template in templates %}
-        <li>
-            <a href="{{ url_for('run_workout', template_id=template[0]) }}">{{ template[1] }}</a>
-            <form method="POST" action="{{ url_for('delete_template', template_id=template[0]) }}" style="display:inline;">
-                <button type="submit">Delete</button>
-            </form>
-            <form method="GET" action="{{ url_for('edit_template', template_id=template[0]) }}" style="display:inline;">
-                <button type="submit">Edit</button>
-            </form>
-        </li>
-    {% endfor %}
-</ul>
 
 <script>
     document.getElementById('addExercise').addEventListener('click', function() {
