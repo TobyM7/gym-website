@@ -10,7 +10,7 @@
             <p>Reps: {{ exercise.reps }}</p>
             <div id="weightsSection_{{ exercise.name }}">
                 <label for="weight_{{ exercise.name }}_1">Weight for Set 1:</label>
-                <input type="number" name="weight_{{ exercise.name }}" id="weight_{{ exercise.name }}_1" required>
+                <input type="number" name="weight_{{ exercise.name }}_1" id="weight_{{ exercise.name }}_1" required>
             </div>
             <table id="sameWeightTable_{{ exercise.name }}">
                 <tr>
@@ -22,7 +22,7 @@
                     </td>
                 </tr>
             </table>
-            <input type="hidden" name="exercise_data" value="{{ exercise.name }};{{ exercise.sets }};{{ exercise.reps }};">
+            <input type="hidden" name="exercise_data" value="{{ exercise.name }};{{ exercise.sets }};{{ exercise.reps }}">
         </div>
         <hr>
     {% endfor %}
@@ -44,14 +44,14 @@
 
                 const input = document.createElement('input');
                 input.type = 'number';
-                input.name = `weight_${exercise.name}`;
+                input.name = `weight_${exercise.name}_${i}`;
                 input.id = `weight_${exercise.name}_${i}`;
                 input.required = true;
                 weightsSection.appendChild(input);
             }
 
             sameWeightCheckbox.addEventListener('change', function() {
-                const weightsInputs = document.querySelectorAll(`[name="weight_${exercise.name}"]`);
+                const weightsInputs = document.querySelectorAll(`[name^="weight_${exercise.name}_"]`);
                 if (this.checked) {
                     const firstWeight = weightsInputs[0].value;
                     weightsInputs.forEach(function(input) {

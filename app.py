@@ -217,14 +217,20 @@ def run_workout(template_id):
         conn.close()
 
         if request.method == 'POST':
-            for exercise in request.form.getlist('exercise_data'):
-                exercise_name, sets, reps, weights = exercise.split(';')
+            for exercise_data in request.form.getlist('exercise_data'):
+                exercise_name, sets, reps = exercise_data.split(';')
+                weights = []
+                for i in range(1, int(sets) + 1):
+                    weight = request.form.get(f'weight_{exercise_name}_{i}')
+                    if weight:
+                        weights.append(weight)
                 date = datetime.now().strftime('%Y-%m-%d')
+                weights_str = ','.join(weights)
 
                 conn = sqlite3.connect('database.db')
                 c = conn.cursor()
                 c.execute("INSERT INTO workouts (exercise, sets, reps, weights, date) VALUES (?, ?, ?, ?, ?)",
-                          (exercise_name, sets, reps, weights, date))
+                          (exercise_name, sets, reps, weights_str, date))
                 conn.commit()
                 conn.close()
 
