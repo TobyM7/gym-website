@@ -216,6 +216,19 @@ def run_workout(template_id):
         template = c.fetchone()
         conn.close()
 
+        # Fetch the last recorded weights for each exercise
+        last_weights = {}
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        for exercise in eval(template[2]):
+            c.execute('''SELECT weights FROM workouts WHERE exercise = ? ORDER BY date DESC LIMIT 1''', (exercise['name'],))
+            last_record = c.fetchone()
+            if last_record:
+                last_weights[exercise['name']] = last_record[0].split(',')
+            else:
+                last_weights[exercise['name']] = []
+        conn.close()
+
         if request.method == 'POST':
             for exercise_data in request.form.getlist('exercise_data'):
                 exercise_name, sets, reps = exercise_data.split(';')
@@ -237,7 +250,7 @@ def run_workout(template_id):
             return redirect(url_for('history'))
 
         exercises = eval(template[2])  # Convert string back to list of dictionaries
-        return render_template('run_workout.html', template=template, exercises=exercises)
+        return render_template('run_workout.html', template=template, exercises=exercises, last_weights=last_weights)
     return redirect(url_for('login'))
 
 if __name__ == '__main__':

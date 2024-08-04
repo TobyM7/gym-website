@@ -32,10 +32,12 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const exercises = {{ exercises | tojson }};
+        const lastWeights = {{ last_weights | tojson }};
         exercises.forEach(exercise => {
             const sets = exercise.sets;
             const weightsSection = document.getElementById(`weightsSection_${exercise.name}`);
             const sameWeightCheckbox = document.getElementById(`sameWeight_${exercise.name}`);
+
             for (let i = 2; i <= sets; i++) {
                 const label = document.createElement('label');
                 label.htmlFor = `weight_${exercise.name}_${i}`;
@@ -50,8 +52,17 @@
                 weightsSection.appendChild(input);
             }
 
+            // Autofill weights with last recorded weights
+            const weightsInputs = document.querySelectorAll(`[name^="weight_${exercise.name}_"]`);
+            if (lastWeights[exercise.name]) {
+                lastWeights[exercise.name].forEach((weight, index) => {
+                    if (weightsInputs[index]) {
+                        weightsInputs[index].value = weight;
+                    }
+                });
+            }
+
             sameWeightCheckbox.addEventListener('change', function() {
-                const weightsInputs = document.querySelectorAll(`[name^="weight_${exercise.name}_"]`);
                 if (this.checked) {
                     const firstWeight = weightsInputs[0].value;
                     weightsInputs.forEach(function(input) {
